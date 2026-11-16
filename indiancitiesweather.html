@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mausam – India City Weather</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#edf1ef;--panel:#fff;--ink:#12302f;--muted:#5b7270;--line:#d5dfdc;--hot:#e8651c;--cold:#2b7fb8;--gold:#f2a516;--teal:#0d5c63;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1716;--panel:#12292a;--ink:#e7f2f0;--muted:#92aeab;--line:#244341;--hot:#ff8344;--cold:#5ab2ea;--teal:#3ab5bf}}
+:root[data-theme="dark"]{--bg:#0a1716;--panel:#12292a;--ink:#e7f2f0;--muted:#92aeab;--line:#244341;--hot:#ff8344;--cold:#5ab2ea;--teal:#3ab5bf}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Sora,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px 40px}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 0}
+.logo{font-weight:800;font-size:20px;flex:1;min-width:120px}
+input,select{padding:10px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);font:inherit}
+input[type=search]{width:min(230px,100%)}
+button{font:inherit;font-weight:600;border:0;border-radius:999px;padding:10px 18px;background:var(--ink);color:var(--bg);cursor:pointer}
+button.alt{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.hero{border-radius:26px;padding:28px;color:#fff;display:grid;grid-template-columns:1.1fr 1fr;gap:24px;background:linear-gradient(135deg,var(--c1),var(--c2));transition:background .4s}
+.hero h1{margin:0;font-size:clamp(26px,5vw,40px);font-weight:800;line-height:1.1}
+.hero p{margin:4px 0 0;opacity:.85}
+.big{font-size:clamp(64px,13vw,112px);font-weight:800;line-height:1;margin:14px 0 4px}
+.big span{font-size:.35em;font-weight:600;opacity:.85;margin-left:6px}
+.pills{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:center}
+.pill{background:rgba(255,255,255,.16);border-radius:16px;padding:12px 14px}
+.pill small{display:block;opacity:.8;font-size:12px}.pill b{font-size:20px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:22px 0 14px}
+.chip{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+.chip.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.tile{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:400}
+.tile.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+.tile b{font-weight:600}.tile .t{font-weight:800;font-size:18px;grid-row:span 2;align-self:center}
+.tile small{color:var(--muted)}
+.th{grid-column:1/-1;height:6px;border-radius:9px;background:var(--line);position:relative;margin-top:6px}
+.th i{position:absolute;top:0;bottom:0;border-radius:9px;background:linear-gradient(90deg,var(--cold),var(--hot))}
+#cp{display:none;margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}
+#cp.show{display:block}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.box{height:300px;position:relative}.w{grid-column:1/-1}
+h2{font-size:16px;margin:0 0 10px}
+.up{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:18px}
+.up p{color:var(--muted);margin:0 0 10px}
+@media (max-width:720px){.hero{grid-template-columns:1fr;padding:20px}}
+</style></head><body>
+<div class="wrap">
+<div class="bar"><div class="logo">Mausam</div><input id="q" type="search" placeholder="Search city or state" aria-label="Search cities"><select id="so" aria-label="Sort"><option value="city">A to Z</option><option value="hi">Hottest</option><option value="lo">Coolest</option><option value="rain">Rainiest</option></select><button class="alt" id="un">Show °F</button><button id="cb">Compare cities</button></div>
+<section class="hero" id="hero" aria-live="polite"><div><p id="hs"></p><h1 id="hc"></h1><div class="big" id="ht"></div><p id="hd"></p></div><div class="pills" id="hp"></div></section>
+<div class="row" id="rg" role="group" aria-label="Region"></div>
+<div class="tiles" id="tl"></div>
+<section id="cp"><div class="g"><div class="w"><h2>Temperature range by city</h2><div class="box"><canvas id="c1"></canvas></div></div><div><h2>Rainfall (mm)</h2><div class="box"><canvas id="c2"></canvas></div></div><div><h2>Humidity (%)</h2><div class="box"><canvas id="c3"></canvas></div></div></div></section>
+<section class="up"><h2>Use your own Excel file</h2><p>Choose an .xlsx with columns City, State / UT, Region, Avg High (°C), Avg Low (°C), Humidity (%), Rainfall (mm), Typical Conditions.</p><input type="file" id="file" accept=".xlsx,.xls" aria-label="Choose Excel file"><p id="msg" style="margin:10px 0 0"></p></section>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+var data=[{"city": "Mumbai", "state": "Maharashtra", "region": "West", "hi": 32, "lo": 22, "hum": 62, "rain": 8, "cond": "Sunny, hazy"}, {"city": "Delhi", "state": "Delhi", "region": "North", "hi": 26, "lo": 12, "hum": 55, "rain": 3, "cond": "Hazy, smog-prone"}, {"city": "Bengaluru", "state": "Karnataka", "region": "South", "hi": 27, "lo": 17, "hum": 70, "rain": 60, "cond": "Partly cloudy, light showers"}, {"city": "Chennai", "state": "Tamil Nadu", "region": "South", "hi": 29, "lo": 23, "hum": 78, "rain": 300, "cond": "Rainy, humid"}, {"city": "Kolkata", "state": "West Bengal", "region": "East", "hi": 28, "lo": 17, "hum": 70, "rain": 15, "cond": "Clear, mild haze"}, {"city": "Hyderabad", "state": "Telangana", "region": "South", "hi": 29, "lo": 17, "hum": 60, "rain": 15, "cond": "Mostly clear"}, {"city": "Ahmedabad", "state": "Gujarat", "region": "West", "hi": 32, "lo": 17, "hum": 45, "rain": 3, "cond": "Sunny, dry"}, {"city": "Pune", "state": "Maharashtra", "region": "West", "hi": 30, "lo": 15, "hum": 55, "rain": 20, "cond": "Clear, cool nights"}, {"city": "Jaipur", "state": "Rajasthan", "region": "North", "hi": 28, "lo": 13, "hum": 40, "rain": 3, "cond": "Sunny, dry"}, {"city": "Lucknow", "state": "Uttar Pradesh", "region": "North", "hi": 27, "lo": 12, "hum": 55, "rain": 3, "cond": "Hazy, foggy mornings"}, {"city": "Chandigarh", "state": "Chandigarh", "region": "North", "hi": 25, "lo": 11, "hum": 50, "rain": 5, "cond": "Clear, cool"}, {"city": "Bhopal", "state": "Madhya Pradesh", "region": "Central", "hi": 28, "lo": 14, "hum": 50, "rain": 10, "cond": "Mostly clear"}, {"city": "Indore", "state": "Madhya Pradesh", "region": "Central", "hi": 29, "lo": 14, "hum": 45, "rain": 15, "cond": "Sunny, pleasant"}, {"city": "Nagpur", "state": "Maharashtra", "region": "Central", "hi": 30, "lo": 15, "hum": 50, "rain": 15, "cond": "Clear, dry"}, {"city": "Patna", "state": "Bihar", "region": "East", "hi": 27, "lo": 14, "hum": 60, "rain": 5, "cond": "Hazy, foggy mornings"}, {"city": "Bhubaneswar", "state": "Odisha", "region": "East", "hi": 29, "lo": 19, "hum": 65, "rain": 60, "cond": "Partly cloudy"}, {"city": "Guwahati", "state": "Assam", "region": "Northeast", "hi": 27, "lo": 15, "hum": 75, "rain": 15, "cond": "Foggy mornings, clear days"}, {"city": "Visakhapatnam", "state": "Andhra Pradesh", "region": "South", "hi": 29, "lo": 21, "hum": 70, "rain": 110, "cond": "Cloudy, occasional rain"}, {"city": "Coimbatore", "state": "Tamil Nadu", "region": "South", "hi": 29, "lo": 20, "hum": 70, "rain": 130, "cond": "Cloudy, rain spells"}, {"city": "Kochi", "state": "Kerala", "region": "South", "hi": 31, "lo": 23, "hum": 75, "rain": 200, "cond": "Humid, frequent rain"}, {"city": "Thiruvananthapuram", "state": "Kerala", "region": "South", "hi": 31, "lo": 23, "hum": 75, "rain": 190, "cond": "Humid, frequent rain"}, {"city": "Surat", "state": "Gujarat", "region": "West", "hi": 33, "lo": 20, "hum": 55, "rain": 8, "cond": "Sunny, warm"}, {"city": "Panaji (Goa)", "state": "Goa", "region": "West", "hi": 33, "lo": 22, "hum": 65, "rain": 40, "cond": "Warm, humid"}, {"city": "Amritsar", "state": "Punjab", "region": "North", "hi": 25, "lo": 10, "hum": 60, "rain": 5, "cond": "Foggy mornings, cool"}, {"city": "Srinagar", "state": "Jammu & Kashmir", "region": "North", "hi": 14, "lo": 1, "hum": 65, "rain": 30, "cond": "Cold, partly cloudy"}],sel=0,reg='All',f=false,ch=[];
+var $=function(i){return document.getElementById(i)};
+var T=function(c){return f?Math.round(c*9/5+32):c},U=function(){return f?'°F':'°C'};
+var uniq=function(a){return a.filter(function(x,i){return a.indexOf(x)===i})};
+function view(){var q=$('q').value.toLowerCase(),k=$('so').value;
+var v=data.filter(function(c){return(!q||(c.city+c.state).toLowerCase().indexOf(q)>-1)&&(reg==='All'||c.region===reg)});
+v.sort(function(a,b){return k==='city'?a.city.localeCompare(b.city):k==='lo'?a.lo-b.lo:b[k]-a[k]});return v}
+function hero(){var c=data[sel];if(!c)return;
+var w=c.hi>=32?['#c2410c','#f59e0b']:c.hi>=27?['#0d5c63','#e0a526']:c.hi>=20?['#0d5c63','#2b7fb8']:['#1e3a8a','#5b8bd0'];
+$('hero').style.setProperty('--c1',w[0]);$('hero').style.setProperty('--c2',w[1]);
+$('hs').textContent=c.state+' · '+c.region;$('hc').textContent=c.city;
+$('ht').innerHTML=T(Math.round((c.hi+c.lo)/2))+'<span>'+U()+' average</span>';$('hd').textContent=c.cond;
+$('hp').innerHTML=[['Average high',T(c.hi)+U()],['Average low',T(c.lo)+U()],['Humidity',c.hum+'%'],['Rainfall',c.rain+' mm']].map(function(p){return'<div class="pill"><small>'+p[0]+'</small><b>'+p[1]+'</b></div>'}).join('')}
+function tiles(){var v=view(),mn=Math.min.apply(null,data.map(function(c){return c.lo})),mx=Math.max.apply(null,data.map(function(c){return c.hi})),sp=(mx-mn)||1;
+$('tl').innerHTML=v.length?v.map(function(c){var i=data.indexOf(c);return'<button class="tile'+(i===sel?' on':'')+'" data-i="'+i+'"><b>'+c.city+'</b><span class="t">'+T(c.hi)+'°</span><small>'+c.state+' · low '+T(c.lo)+'°</small><span class="th"><i style="left:'+((c.lo-mn)/sp*100)+'%;right:'+(100-(c.hi-mn)/sp*100)+'%"></i></span></button>'}).join(''):'<p>No cities match. Clear the search or pick another region.</p>';
+document.querySelectorAll('.tile').forEach(function(b){b.onclick=function(){sel=+b.dataset.i;hero();tiles();window.scrollTo({top:0,behavior:'smooth'})}})}
+function regions(){$('rg').innerHTML=['All'].concat(uniq(data.map(function(c){return c.region}))).map(function(r){return'<button class="chip'+(r===reg?' on':'')+'" data-r="'+r+'">'+r+'</button>'}).join('');
+document.querySelectorAll('.chip').forEach(function(b){b.onclick=function(){reg=b.dataset.r;regions();tiles()}})}
+function draw(){ch.forEach(function(c){c.destroy()});ch=[];
+var cs=getComputedStyle(document.documentElement),g=function(n,d){return cs.getPropertyValue(n).trim()||d};
+Chart.defaults.color=g('--muted','#5b7270');Chart.defaults.font.family='Sora,system-ui,sans-serif';
+var o={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}},L=data.map(function(c){return c.city});
+ch.push(new Chart($('c1'),{type:'bar',data:{labels:L,datasets:[{label:'Range ('+U()+')',data:data.map(function(c){return[T(c.lo),T(c.hi)]}),backgroundColor:g('--hot','#e8651c'),borderSkipped:false}]},options:o}));
+ch.push(new Chart($('c2'),{type:'bar',data:{labels:L,datasets:[{data:data.map(function(c){return c.rain}),backgroundColor:g('--cold','#2b7fb8')}]},options:Object.assign({},o,{indexAxis:'y'})}));
+ch.push(new Chart($('c3'),{type:'line',data:{labels:L,datasets:[{data:data.map(function(c){return c.hum}),borderColor:g('--teal','#0d5c63'),backgroundColor:g('--teal','#0d5c63'),tension:.3}]},options:o}))}
+function all(){hero();regions();tiles();if($('cp').classList.contains('show'))draw()}
+$('q').oninput=tiles;$('so').onchange=tiles;
+$('un').onclick=function(){f=!f;$('un').textContent=f?'Show °C':'Show °F';all()};
+$('cb').onclick=function(){var s=$('cp').classList.toggle('show');$('cb').textContent=s?'Hide comparison':'Compare cities';if(s){draw();$('cp').scrollIntoView({behavior:'smooth'})}};
+$('file').onchange=function(e){var fl=e.target.files[0];if(!fl)return;var rd=new FileReader();
+rd.onload=function(ev){try{var wb=XLSX.read(ev.target.result,{type:'array'}),r=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+var out=r.map(function(x){return{city:String(x['City']||''),state:String(x['State / UT']||''),region:String(x['Region']||''),hi:+x['Avg High (°C)'],lo:+x['Avg Low (°C)'],hum:+x['Humidity (%)'],rain:+x['Rainfall (mm)'],cond:String(x['Typical Conditions']||'')}}).filter(function(c){return c.city&&!isNaN(c.hi)&&!isNaN(c.lo)});
+if(!out.length)throw 0;data=out;sel=0;reg='All';all();$('msg').textContent='Loaded '+out.length+' cities from '+fl.name+'.'}
+catch(x){$('msg').textContent='Could not read that file. Check the column names listed above.'}};rd.readAsArrayBuffer(fl)};
+all();
+})();
+</script></body></html>
